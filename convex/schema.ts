@@ -8,6 +8,7 @@ export default defineSchema({
     description: v.string(),
     date: v.string(), // Stored as YYYY-MM-DD
     idempotencyKey: v.string(), // The shield against double-submissions
+    createdAt: v.number(),
   })
     .index("by_idempotencyKey", ["idempotencyKey"])
     .index("by_date", ["date"]),

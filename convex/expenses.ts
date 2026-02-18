@@ -14,7 +14,7 @@ export const get = query({
     expenses.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     // Requirement 3: Filter by category
-    if (args.category && args.category !== "All") {
+    if (args.category) {
       expenses = expenses.filter(e => e.category === args.category);
     }
 
@@ -32,7 +32,12 @@ export const create = mutation({
     idempotencyKey: v.string(),
   },
   handler: async (ctx, args) => {
-    // IDEMPOTENCY CHECK: Did the user double-click or retry a network request?
+    // 🛡️ BACKEND VALIDATION: Strictly prevent negative/zero amounts
+    if (args.amountInPaise <= 0) {
+      throw new Error("Amount must be a positive number.");
+    }
+
+    // 🛡️ IDEMPOTENCY CHECK: Did the user double-click or retry a network request?
     const existing = await ctx.db
       .query("expenses")
       .withIndex("by_idempotencyKey", (q) => q.eq("idempotencyKey", args.idempotencyKey))
@@ -50,6 +55,7 @@ export const create = mutation({
       description: args.description,
       date: args.date,
       idempotencyKey: args.idempotencyKey,
+      createdAt: Date.now(), // Fulfills the 'created_at' requirement
     });
   },
 });

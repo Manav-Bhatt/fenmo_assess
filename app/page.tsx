@@ -161,7 +161,7 @@ export default function ExpensoDashboard() {
 
             <button 
               type="submit" disabled={isSubmitting}
-              className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-primary hover:bg-primary-hover text-black font-bold py-4 rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="material-symbols-outlined">{isSubmitting ? "hourglass_empty" : "add_circle"}</span>
               {isSubmitting ? "Processing..." : "Add Expense"}
