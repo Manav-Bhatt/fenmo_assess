@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Expenso: Production-Grade Personal Finance Tracker
 
-## Getting Started
+Live Application: [https://expenso-fenmo.vercel.app/]
 
-First, run the development server:
+🚀 Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Expenso is a minimal full-stack expense management tool built to handle real-world network conditions while maintaining strict financial data correctness. This project was developed as part of the Fenmo Technical Assessment.
+🛠 Tech Stack
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+    Frontend: Next.js 15 (App Router), Tailwind CSS v4, shadcn/ui.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+    Backend/Database: Convex (Type-safe Serverless Database & Real-time RPC).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+    Utilities: UUID (Idempotency), Sonner (Toast Notifications).
 
-## Learn More
+🧠 Key Design Decisions
+1. Financial Data Integrity (The "Money" Problem)
 
-To learn more about Next.js, take a look at the following resources:
+To avoid JavaScript's floating-point precision issues (e.g., 0.1 + 0.2 !== 0.3), Expenso treats money as a first-class citizen:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+    Integer Storage: All amounts are converted to the smallest currency unit (Paise) and stored as integers in the database.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+    Conversion Logic: Floats are only used at the "edge" (UI input and display formatting). All backend logic and storage utilize amountInPaise.
 
-## Deploy on Vercel
+2. Network Resiliency & Idempotency
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+As per the requirement to handle "unreliable networks and multiple clicks," I implemented a robust idempotency layer:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+    Unique Keys: Every new expense form generates a unique UUID idempotencyKey on mount.
+
+    Database Enforcement: The backend mutation checks an index for this key before performing an insert. If a client retries a request due to a network timeout or rapid button-mashing, the system identifies the duplicate and returns the existing record rather than creating a second charge.
+
+3. Real-time Reactivity
+
+Using Convex allowed for an "Optimistic UI" pattern. State updates (Totals, History) happen instantly via WebSockets. If a background sync or refresh occurs, the data remains consistent without manual state management boilerplate.
+⚖️ Trade-offs & Constraints
+
+    Convex vs. SQL: I chose Convex (BaaS) over a traditional PostgreSQL setup to maximize the 4-hour window. This allowed me to deliver a production-ready UI and bulletproof API logic rather than spending time on database migrations and ORM configuration.
+
+    Authentication: Per the "minimal feature set" instructions, authentication was intentionally omitted to focus on data correctness and production-level API behavior.
+
+    Testing: While I verified the build with npm run build and performed manual edge-case testing for negative values and idempotency, I prioritized end-to-end functionality over a comprehensive Jest suite given the timebox.
+
+🚦 Features Implemented
+
+    ✅ Create Expense: Validated positive amounts and required fields.
+
+    ✅ Real-time Totals: Dynamically calculated based on the current filtered view.
+
+    ✅ Category Filtering: Smooth server-side filtering.
+
+    ✅ Date Sorting: Newest expenses always appear first.
+
+    ✅ Mobile Responsive: Custom dark-themed UI optimized for all screen sizes.
