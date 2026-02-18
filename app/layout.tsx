@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Manrope } from "next/font/google";
 import { Toaster } from "sonner";
 import { ConvexClientProvider } from "./ConvexClientProvider";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// Configure Next.js optimized Manrope font
+const manrope = Manrope({
   subsets: ["latin"],
 });
 
@@ -25,11 +20,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    // The "dark" class forces Tailwind's dark mode palette to activate
+    <html lang="en" className="dark">
+      <head>
+        {/* Google Material Icons required for the UI components */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        // Apply the optimized font and our specific dark mode background colors
+        className={`${manrope.className} bg-background-dark text-text-primary antialiased`}
       >
-        <Toaster position="top-center" />
+        <Toaster position="top-center" theme="dark" />
         <ConvexClientProvider>{children}</ConvexClientProvider>
       </body>
     </html>
