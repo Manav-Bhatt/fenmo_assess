@@ -78,12 +78,21 @@ export default function ExpenseTracker() {
     }
   };
 
-  // Calculate the total of the *currently visible* expenses
+// --- Calculations ---
+  // 1. Total of currently visible expenses
   const totalInPaise = expenses?.reduce((sum, exp) => sum + exp.amountInPaise, 0) || 0;
+  
+  // 2. Format it for the UI (this is the variable TS is looking for!)
   const formattedTotal = (totalInPaise / 100).toLocaleString("en-IN", {
     style: "currency",
     currency: "INR",
   });
+
+  // 3. Category Summary calculations
+  const categoryTotals = expenses?.reduce((acc, exp) => {
+    acc[exp.category] = (acc[exp.category] || 0) + exp.amountInPaise;
+    return acc;
+  }, {} as Record<string, number>);
 
   return (
     <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
@@ -169,6 +178,18 @@ export default function ExpenseTracker() {
           </CardHeader>
           
           <CardContent className="pt-6">
+          {expenses && expenses.length > 0 && filterCategory === "All" && (
+              <div className="flex flex-wrap gap-3 mb-6 p-4 bg-muted/30 rounded-lg border">
+                {Object.entries(categoryTotals || {}).map(([cat, amount]) => (
+                  <div key={cat} className="flex flex-col bg-white px-3 py-2 rounded-md border shadow-sm flex-1 min-w-30">
+                    <span className="text-xs text-muted-foreground font-medium">{cat}</span>
+                    <span className="text-sm font-bold text-gray-800">
+                      {(amount / 100).toLocaleString("en-IN", { style: "currency", currency: "INR" })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
             {expenses === undefined ? (
               <div className="text-center text-muted-foreground py-8 animate-pulse">Loading expenses...</div>
             ) : expenses.length === 0 ? (
